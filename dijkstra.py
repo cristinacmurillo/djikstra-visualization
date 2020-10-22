@@ -22,7 +22,7 @@ def display(Q):
 
     rect = pygame.draw.rect(screen, blue, [padding, padding, (size - padding * 2),  (size - padding * 2)])
 
-    #grid drawing
+    #grid drawin
     i = step_size
     for x in range (round(10 / resolution) + 1):
         pygame.draw.line(screen, black, (padding,i), ((size - padding), i), 2)
