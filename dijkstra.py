@@ -100,10 +100,8 @@ def map(file_directory):
 
 
 def dijkstra():
-    obstacles = map('mapas\map01.csv')
-    # display(obstacles)
+    obstacles = map('mapas\map04.csv')
     obstacles_coords = [coords for obstacle in obstacles for coords in obstacle]
-    # print(obstacles_coords)
     origin = [3.0, 1.0]
     end = [8.0, 5.0]
     operations = [[0, 0.5], [0.5, 0.5], [0.5, 0], [0.5, -0.5], [0, -0.5], [-0.5, -0.5], [-0.5, 0], [-0.5, 0.5]]
