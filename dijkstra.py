@@ -9,9 +9,10 @@ pygame.init()
 
 class Circle:
 
-    def __init__(self, coords, parent=None, stage=1):
+    def __init__(self, coords, weight = 0, parent=None, stage=1):
         self.visited = True
         self.coords = coords
+        self.weight = weight
         self.parent = parent
         self.stage = stage
 
@@ -35,7 +36,7 @@ def drawcircles(Q, size = 600, padding = 50,resolution = 0.5 ):
             pygame.draw.circle(screen, red, coord_i, 5)
     pygame.display.flip()
 
-def display(Q):
+def display(Q, obstacles):
 
     resolution = 0.5
 
@@ -63,15 +64,24 @@ def display(Q):
         pygame.draw.line(screen, black, (i, padding), (i, (size - padding)), 2)
         i += (step_size * resolution)
 
-    for coords in Q:
-        for coord in coords:
-            coord[0] = int(padding + ((coord[0] / resolution)
-                                    * step_size * resolution))
-            coord[1] = int((size - padding) -
-                        ((coord[1] / resolution) * step_size * resolution))
-            coord_i = [coord[0], coord[1]]
 
-            pygame.draw.circle(screen, red, coord_i, 5)
+    for coord in obstacles:
+        coord[0] = int(padding + ((coord[0] / resolution)
+                                * step_size * resolution))
+        coord[1] = int((size - padding) -
+                    ((coord[1] / resolution) * step_size * resolution))
+        coord_i = [coord[0], coord[1]]
+
+        pygame.draw.circle(screen, black, coord_i, 5)
+
+    for coord in Q:
+        coord[0] = int(padding + ((coord[0] / resolution)
+                                * step_size * resolution))
+        coord[1] = int((size - padding) -
+                    ((coord[1] / resolution) * step_size * resolution))
+        coord_i = [coord[0], coord[1]]
+
+        pygame.draw.circle(screen, red, coord_i, 5)
     pygame.display.flip()
     # x_i = [padding, size-padding] # initial position
     while(True):
@@ -101,12 +111,11 @@ def map(file_directory):
 
 def dijkstra():
     obstacles = map('mapas\map01.csv')
-    # display(obstacles)
     obstacles_coords = [coords for obstacle in obstacles for coords in obstacle]
-    # print(obstacles_coords)
     origin = [3.0, 1.0]
     end = [8.0, 5.0]
-    operations = [[0, 0.5], [0.5, 0.5], [0.5, 0], [0.5, -0.5], [0, -0.5], [-0.5, -0.5], [-0.5, 0], [-0.5, 0.5]]
+    operations = [[0, 0.5], [0.5, 0], [0, -0.5], [-0.5, 0]]
+    diagonal_operations = [[0.5, 0.5], [0.5, -0.5], [-0.5, -0.5], [-0.5, 0.5]]
 
     leading_nodes = [Circle(origin)]
     leading_coords = []
@@ -120,7 +129,16 @@ def dijkstra():
                 if tuple(new_coord) in visited or new_coord in obstacles_coords or new_coord[0] < 0 or new_coord[0] > 10 or new_coord[1] < 0 or new_coord[1] > 10:
                     pass
                 else:
-                    node = Circle(new_coord, parent=leading_node)
+                    node = Circle(new_coord, parent=leading_node, weight = 0.5)
+                    next_nodes.append(node)
+                    next_coords.append(new_coord)
+                visited.add(tuple(new_coord))
+            for op in diagonal_operations:
+                new_coord = [leading_node.coords[0] + op[0], leading_node.coords[1] + op[1]]
+                if tuple(new_coord) in visited or new_coord in obstacles_coords or new_coord[0] < 0 or new_coord[0] > 10 or new_coord[1] < 0 or new_coord[1] > 10:
+                    pass
+                else:
+                    node = Circle(new_coord, parent=leading_node, weight = 0.7)
                     next_nodes.append(node)
                     next_coords.append(new_coord)
                 visited.add(tuple(new_coord))
@@ -128,13 +146,17 @@ def dijkstra():
         leading_coords = next_coords
 
     visualised_coords = []
+    weight = 0
     node = leading_nodes[leading_coords.index(end)]
     while node.parent:
         visualised_coords.append(node.parent.coords)
+        weight += node.weight
         node = node.parent
     
-    display([visualised_coords])
-    return visualised_coords
+    print(visualised_coords)
+    print(weight)
+    return visualised_coords, obstacles_coords
 
 
-dijkstra()
+d = dijkstra()
+display(d[0], d[1])
